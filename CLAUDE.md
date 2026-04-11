@@ -10,7 +10,7 @@
 
 ## 技術スタック
 
-- フロントエンド: Vite + TypeScript + Canvas
+- フロントエンド: Vite + TypeScript + PixiJS (v8) + HTML/CSS（UI）
 - バックエンド: Hono + Cloudflare Workers
 - リアルタイム同期: WebSocket + Durable Objects
 - データ永続化: Cloudflare D1

@@ -1,4 +1,4 @@
-# スチャラカトレイン 技術設計
+# スーパーまぼろし鉄道サニールネッサンス線 技術設計
 
 ## 全体構成
 
@@ -6,7 +6,7 @@
 ┌─────────────┐     WebSocket      ┌──────────────────────┐
 │  ブラウザ     │◄──────────────────►│  CF Workers           │
 │  Vite+TS     │                    │  Hono                │
-│  Canvas描画   │     POST /api/roll │  Durable Objects     │
+│  PixiJS+HTML │     POST /api/roll │  Durable Objects     │
 └─────────────┘◄────────────────────│  (ゲーム状態管理)      │
                                     │                      │
 ┌─────────────┐     POST (投稿後)   │  D1                  │
@@ -23,8 +23,10 @@
 ## フロントエンド
 
 - **Vite + TypeScript**: ビルド・開発環境
-- **Canvas**: マップ・電車・UI描画
+- **PixiJS (v8)**: 2D WebGLレンダラー。マップ描画・スプライト管理・エフェクト（BlurFilter, DisplacementFilter, ColorMatrixFilter）
+- **HTML/CSS**: UI部品（メニュー・ボタン・シェアボタン）はDOM要素で実装。PixiJSのCanvasの上に重ねる
 - **WebSocket**: サーバーからのリアルタイム更新受信
+- **モバイルファースト**: タッチ操作（スワイプ・ピンチ）前提の設計
 
 ## バックエンド
 
