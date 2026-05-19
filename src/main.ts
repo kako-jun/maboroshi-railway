@@ -29,6 +29,7 @@ async function main() {
 
   const mapRenderer = new MapRenderer(app)
   app.stage.addChild(mapRenderer.world)
+  app.stage.addChild(mapRenderer.labelLayer)
   mapRenderer.draw(tiles)
 
   const playerRenderer = new PlayerRenderer(mapRenderer.world, tiles[0])
@@ -44,15 +45,29 @@ async function main() {
 
   window.addEventListener('resize', () => mapRenderer.recenter())
 
-  app.ticker.add((ticker) => playerRenderer.update(ticker))
+  app.ticker.add((ticker) => {
+    playerRenderer.update(ticker)
+    mapRenderer.updateLabels()
+  })
 
   function pushLog(line: string) {
     state.log.push(line)
-    if (state.log.length > 40) state.log.shift()
+    if (state.log.length > 12) state.log.shift()
   }
 
   function rerender() {
     hud.render(state, state.phase === 'idle' && canPurchaseHere(state))
+  }
+
+  function resolveLanding(result: { message: string; reachedDestination: boolean }, lapped: boolean) {
+    pushLog(result.message)
+    if (lapped) {
+      const lap = applyLapBonus(state)
+      if (lap) pushLog(lap)
+    }
+    if (result.reachedDestination) {
+      pushLog('🏯 次の目的地を抽選中... (プロトタイプではここで一旦終了)')
+    }
   }
 
   function roll() {
@@ -61,18 +76,19 @@ async function main() {
     state.turn += 1
 
     let steps = rollDice()
-    let baseMsg = `<dice>${steps}</dice>`
+    const tags: string[] = []
     if (state.player.pendingExpress) {
       steps *= 2
-      baseMsg += ' (急行 ×2)'
+      tags.push('急行×2')
       state.player.pendingExpress = false
     }
     if (state.player.pendingReverse) {
       state.player.direction = (-state.player.direction) as 1 | -1
-      baseMsg += ' [逆走発動]'
+      tags.push('逆走')
       state.player.pendingReverse = false
     }
-    pushLog(`🎲 サイコロ ${baseMsg.replace(/<\/?dice>/g, '')} → ${steps} マス進む`)
+    const tagStr = tags.length ? ` [${tags.join('/')}]` : ''
+    pushLog(`🎲 サイコロ ${steps}${tagStr} → ${steps} マス進む`)
     rerender()
 
     const pathIdx = plannedPath(state, steps)
@@ -80,19 +96,11 @@ async function main() {
     state.phase = 'moving'
 
     playerRenderer.moveAlong(pathTiles, {
-      onStep: () => {},
       onComplete: () => {
-        applyMoveResult(state, pathIdx)
+        const moveRes = applyMoveResult(state, pathIdx)
         state.phase = 'resolving'
         const result = applyTileEffect(state)
-        pushLog(result.message)
-        const lap = applyLapBonus(state)
-        if (lap && (state.player.lapsCompleted > 0)) {
-          pushLog(lap)
-        }
-        if (result.reachedDestination) {
-          pushLog('🏯 次の目的地を抽選中... (プロトタイプではここで一旦終了)')
-        }
+        resolveLanding(result, moveRes.lapped)
         state.phase = 'idle'
         rerender()
       },
@@ -118,7 +126,7 @@ async function main() {
     if (id === 'warp') {
       playerRenderer.jumpTo(tiles[state.player.tileIndex])
       const effect = applyTileEffect(state)
-      pushLog(effect.message)
+      resolveLanding(effect, false)
     }
     rerender()
   }

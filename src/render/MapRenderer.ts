@@ -3,7 +3,6 @@ import type { Tile } from '../types/Tile'
 
 const TILE_COLORS: Record<Tile['kind'], number> = {
   station: 0xb8362a,
-  property: 0xc9a063,
   plus: 0x6aa66a,
   minus: 0x4a4a6a,
   card: 0x9a6ab0,
@@ -13,11 +12,20 @@ const TILE_COLORS: Record<Tile['kind'], number> = {
 const STATION_RADIUS = 14
 const TILE_RADIUS = 7
 
+interface LabelEntry {
+  tileX: number
+  tileY: number
+  offsetY: number
+  text: Text
+}
+
 export class MapRenderer {
   readonly world: Container
   private rails: Graphics
   private tilesLayer: Container
-  private labelLayer: Container
+  /** ラベルは world から切り離して stage 直下に置く (回転しても傾かないため) */
+  readonly labelLayer: Container
+  private labels: LabelEntry[] = []
   private ownedMarkers = new Map<string, Graphics>()
 
   constructor(private app: Application) {
@@ -26,9 +34,9 @@ export class MapRenderer {
     this.rails = new Graphics()
     this.tilesLayer = new Container()
     this.labelLayer = new Container()
+    this.labelLayer.label = 'labels'
     this.world.addChild(this.rails)
     this.world.addChild(this.tilesLayer)
-    this.world.addChild(this.labelLayer)
     this.recenter()
   }
 
@@ -40,6 +48,7 @@ export class MapRenderer {
     this.rails.clear()
     this.tilesLayer.removeChildren()
     this.labelLayer.removeChildren()
+    this.labels = []
     this.ownedMarkers.clear()
 
     this.rails.moveTo(tiles[0].x, tiles[0].y)
@@ -55,7 +64,7 @@ export class MapRenderer {
     this.rails.stroke({ width: 1, color: 0xf3ebd9, alpha: 0.55 })
 
     for (const tile of tiles) {
-      const isStation = tile.kind === 'station' || tile.kind === 'property' || tile.kind === 'destination'
+      const isStation = tile.kind === 'station' || tile.kind === 'destination'
       const radius = isStation ? STATION_RADIUS : TILE_RADIUS
       const fill = TILE_COLORS[tile.kind]
       const g = new Graphics()
@@ -85,9 +94,17 @@ export class MapRenderer {
           },
         })
         t.anchor.set(0.5, 1)
-        t.position.set(tile.x, tile.y - radius - 4)
         this.labelLayer.addChild(t)
+        this.labels.push({ tileX: tile.x, tileY: tile.y, offsetY: -radius - 4, text: t })
       }
+    }
+  }
+
+  /** world 座標 → stage 座標に射影して label 位置を毎フレーム更新する。Text 自体は回転しない */
+  updateLabels(): void {
+    for (const entry of this.labels) {
+      const p = this.world.toGlobal({ x: entry.tileX, y: entry.tileY + entry.offsetY })
+      entry.text.position.set(p.x, p.y)
     }
   }
 
@@ -102,9 +119,5 @@ export class MapRenderer {
 
   rotateBy(delta: number): void {
     this.world.rotation += delta
-  }
-
-  setRotation(angle: number): void {
-    this.world.rotation = angle
   }
 }

@@ -1,8 +1,5 @@
 import type { GameState } from '../types/GameState'
 
-/**
- * direction を踏まえて steps 分だけ進めるパスを返す。端で反射する。
- */
 export function plannedPath(state: GameState, steps: number): number[] {
   const path: number[] = []
   let idx = state.player.tileIndex
@@ -18,25 +15,31 @@ export function plannedPath(state: GameState, steps: number): number[] {
   return path
 }
 
-export function applyMoveResult(state: GameState, path: number[]): void {
-  if (path.length === 0) return
-  const start = state.player.tileIndex
-  const end = path[path.length - 1]
+export interface MoveResult {
+  lapped: boolean
+}
+
+/**
+ * lap = 「端駅 (0 か last) を踏んで反射した」回数。
+ * 周回ボーナスはこの瞬間にのみ加算する (毎ターン加算ではない)。
+ */
+export function applyMoveResult(state: GameState, path: number[]): MoveResult {
+  if (path.length === 0) return { lapped: false }
   const last = state.tiles.length - 1
-  let dir: 1 | -1 = end >= start ? 1 : -1
+  let dir: 1 | -1 = state.player.direction
+  let lapped = false
   for (let i = 0; i + 1 < path.length; i++) {
     if (path[i + 1] < path[i]) {
+      if (path[i] === last) lapped = true
       dir = -1
-      break
-    }
-    if (path[i + 1] > path[i]) {
+    } else if (path[i + 1] > path[i]) {
+      if (path[i] === 0) lapped = true
       dir = 1
-      break
     }
   }
-  if (path.includes(last) && end !== last) {
-    state.player.lapsCompleted += 1
-  }
+  const end = path[path.length - 1]
+  if (lapped) state.player.lapsCompleted += 1
   state.player.tileIndex = end
   state.player.direction = dir
+  return { lapped }
 }

@@ -1,10 +1,4 @@
-export type TileKind =
-  | 'station'
-  | 'plus'
-  | 'minus'
-  | 'card'
-  | 'property'
-  | 'destination'
+export type TileKind = 'station' | 'plus' | 'minus' | 'card' | 'destination'
 
 export interface Tile {
   index: number

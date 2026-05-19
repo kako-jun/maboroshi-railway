@@ -21,6 +21,9 @@ export function useCard(state: GameState, cardId: CardId): CardUseResult {
       const stations = state.tiles.filter((t) => t.kind === 'station' || t.kind === 'destination')
       const dest = stations[Math.floor(Math.random() * stations.length)]
       state.player.tileIndex = dest.index
+      const last = state.tiles.length - 1
+      if (dest.index === 0) state.player.direction = 1
+      else if (dest.index === last) state.player.direction = -1
       return { message: `ワープカード発動: 「${dest.name}」まで飛んだ` }
     }
     case 'tokuseirei':

@@ -77,8 +77,8 @@ export class Hud {
     this.debtEl.textContent = fmt(state.totalDebt)
     const tile = state.tiles[state.player.tileIndex]
     const flags: string[] = []
-    if (state.player.pendingExpress) flags.push('急行')
-    if (state.player.pendingReverse) flags.push('逆走')
+    if (state.player.pendingExpress) flags.push('急行予約')
+    if (state.player.pendingReverse) flags.push('逆走予約')
     this.locationEl.textContent = `${tile.name}${flags.length ? ` [${flags.join('/')}]` : ''}`
 
     this.rollBtn.disabled = state.phase !== 'idle'
@@ -96,7 +96,7 @@ export class Hud {
     }
 
     this.logEl.innerHTML = ''
-    for (const line of state.log.slice(-6)) {
+    for (const line of state.log.slice(-8)) {
       const d = document.createElement('div')
       d.className = 'entry'
       d.textContent = line

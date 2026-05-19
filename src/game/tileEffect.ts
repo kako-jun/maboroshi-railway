@@ -38,16 +38,14 @@ export function applyTileEffect(state: GameState): TileEffectResult {
       state.player.hand.push(id)
       return { message: `${tile.name}: 「${CARD_DEFS[id].name}」カードを入手`, reachedDestination: false }
     }
-    case 'station':
-    case 'property': {
+    case 'station': {
       return { message: `${tile.name}駅に到着`, reachedDestination: false }
     }
     case 'destination': {
       const reward = 3000
       state.player.money += reward
-      state.totalDebt = Math.max(0, state.totalDebt - reward)
       return {
-        message: `目的地「${tile.name}」到着! +¥${reward.toLocaleString()} 赤字 ¥${state.totalDebt.toLocaleString()}`,
+        message: `目的地「${tile.name}」到着! +¥${reward.toLocaleString()}`,
         reachedDestination: true,
       }
     }
