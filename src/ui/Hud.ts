@@ -96,7 +96,7 @@ export class Hud {
     }
 
     this.logEl.innerHTML = ''
-    for (const line of state.log.slice(-8)) {
+    for (const line of state.log.slice(-10)) {
       const d = document.createElement('div')
       d.className = 'entry'
       d.textContent = line

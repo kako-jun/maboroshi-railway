@@ -52,7 +52,7 @@ async function main() {
 
   function pushLog(line: string) {
     state.log.push(line)
-    if (state.log.length > 12) state.log.shift()
+    if (state.log.length > 24) state.log.shift()
   }
 
   function rerender() {
@@ -66,7 +66,8 @@ async function main() {
       if (lap) pushLog(lap)
     }
     if (result.reachedDestination) {
-      pushLog('🏯 次の目的地を抽選中... (プロトタイプではここで一旦終了)')
+      pushLog('🏯 目的地に到着! プロトタイプはここで終了 (新しい目的地ローテーションは未実装)')
+      state.phase = 'ended'
     }
   }
 
@@ -80,15 +81,15 @@ async function main() {
     if (state.player.pendingExpress) {
       steps *= 2
       tags.push('急行×2')
-      state.player.pendingExpress = false
     }
     if (state.player.pendingReverse) {
       state.player.direction = (-state.player.direction) as 1 | -1
       tags.push('逆走')
-      state.player.pendingReverse = false
     }
     const tagStr = tags.length ? ` [${tags.join('/')}]` : ''
     pushLog(`🎲 サイコロ ${steps}${tagStr} → ${steps} マス進む`)
+    state.player.pendingExpress = false
+    state.player.pendingReverse = false
     rerender()
 
     const pathIdx = plannedPath(state, steps)
@@ -101,7 +102,7 @@ async function main() {
         state.phase = 'resolving'
         const result = applyTileEffect(state)
         resolveLanding(result, moveRes.lapped)
-        state.phase = 'idle'
+        if (state.phase === 'resolving') state.phase = 'idle'
         rerender()
       },
     })

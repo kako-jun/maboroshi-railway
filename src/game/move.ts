@@ -22,12 +22,18 @@ export interface MoveResult {
 /**
  * lap = 「端駅 (0 か last) を踏んで反射した」回数。
  * 周回ボーナスはこの瞬間にのみ加算する (毎ターン加算ではない)。
+ * 端駅スタートで即反射した場合も lap として数える。
  */
 export function applyMoveResult(state: GameState, path: number[]): MoveResult {
   if (path.length === 0) return { lapped: false }
   const last = state.tiles.length - 1
+  const startIdx = state.player.tileIndex
   let dir: 1 | -1 = state.player.direction
   let lapped = false
+
+  if (startIdx === last && path[0] < startIdx) lapped = true
+  if (startIdx === 0 && path[0] > startIdx) lapped = true
+
   for (let i = 0; i + 1 < path.length; i++) {
     if (path[i + 1] < path[i]) {
       if (path[i] === last) lapped = true

@@ -95,7 +95,7 @@ export class MapRenderer {
         })
         t.anchor.set(0.5, 1)
         this.labelLayer.addChild(t)
-        this.labels.push({ tileX: tile.x, tileY: tile.y, offsetY: -radius - 4, text: t })
+        this.labels.push({ tileX: tile.x, tileY: tile.y, offsetY: -radius - 10, text: t })
       }
     }
   }

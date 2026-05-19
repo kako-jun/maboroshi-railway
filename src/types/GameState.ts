@@ -23,7 +23,7 @@ export interface GameState {
   destinationTileIndex: number
   totalDebt: number
   turn: number
-  phase: 'idle' | 'rolling' | 'moving' | 'resolving'
+  phase: 'idle' | 'rolling' | 'moving' | 'resolving' | 'ended'
   log: string[]
 }
 
