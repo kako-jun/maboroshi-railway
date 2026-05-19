@@ -1,0 +1,15 @@
+node_modules
+dist
+dist-ssr
+*.local
+*.log
+
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+.idea
+*.sw?
+.env
+.env.*
+.env.local
+.claude/settings.local.json
