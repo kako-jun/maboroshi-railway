@@ -91,6 +91,7 @@ export class Hud {
       chip.className = 'card-chip'
       chip.textContent = def.name
       chip.title = def.description
+      chip.disabled = state.phase !== 'idle'
       chip.addEventListener('click', () => this.cb.onUseCard(id))
       this.cardsEl.appendChild(chip)
     }

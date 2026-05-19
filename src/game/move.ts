@@ -31,6 +31,9 @@ export function applyMoveResult(state: GameState, path: number[]): MoveResult {
   let dir: 1 | -1 = state.player.direction
   let lapped = false
 
+  if (path[0] > startIdx) dir = 1
+  else if (path[0] < startIdx) dir = -1
+
   if (startIdx === last && path[0] < startIdx) lapped = true
   if (startIdx === 0 && path[0] > startIdx) lapped = true
 
